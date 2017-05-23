@@ -1,0 +1,66 @@
+
+<aiml version="1.0.1" encoding="UTF-8">
+	<category>
+		<pattern> HI </pattern>
+		<template> 
+			Hi to you
+		</template>
+	</category>
+	<category>
+		<pattern> SAY SOMETHING </pattern>
+		<template> 
+			I won't
+		</template>
+	</category>
+
+	<category>
+		<pattern> * TALK ABOUT * </pattern>
+		<template> 
+			I know a lof of stuff about <star index = "2"/>
+		</template>
+	</category>
+
+	<category>
+		<pattern>WHATS UP</pattern>
+		<template> 
+			I doing well
+		</template>
+	</category>
+
+	<category>
+		<pattern> HOW ARE YOU </pattern>
+		<template> 
+			<srai> whats up </srai> 
+		</template>
+	</category>
+
+	<category>
+		<pattern> WHAT IS YOUR NAME </pattern>
+		<template> 
+			<random>
+				<li> You can call me any name you like. I am not choosy!</li>
+				<li> My name is Bot </li>
+				<li> My friends call me Bot </li>
+			</random>
+		</template>
+	</category>
+
+	<category>
+		<pattern> MY NAME IS _ </pattern>
+		<template> 
+			I will remember your name, 
+			<set name="username"> <star/> </set>
+
+		</template>s
+	</category>
+
+	<category>
+		<pattern> WHAT IS MY NAME </pattern>
+		<template> 
+			Nice try. Your name is <get name="username"/>			
+		</template>s
+	</category>
+
+
+</aiml>
+
