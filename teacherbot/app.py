@@ -4,9 +4,6 @@ import os
 import requests
 from flask import Flask, json, jsonify, render_template, make_response, request, abort
 
-import TeacherBot
-
-
 app = Flask(__name__)
 
 app.static_folder = 'static'
