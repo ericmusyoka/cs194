@@ -28,7 +28,7 @@ def not_found(_):
 
 @app.route('/')
 def main_site():
-    return "I am here"
+    return render_template('main.html')
 
 
 # Toy API caller
