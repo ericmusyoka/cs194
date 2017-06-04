@@ -9,10 +9,31 @@ class BotBrain:
 		return []
 
 	def computeTFIDF(self):
-		return 0
+		print "Computing tfidf..."
 
-	def getTFIDF(self, word, document):
-		return 0
+		tfidf = {} # {word: { docId: tfidf}}
+		for docId, document in enumerate(self.documents):
+			for word in document:
+				wordCountInDocument = len(invertedIndex[word][docId])
+				if word not in tfidf.keys():
+					tfidf[word] = {}
+				if docId not in tfidf[word].keys():
+					tfidf[word][docId] = 0
+				tfidf[word][docId] += wordCountInDocument
+
+		for word in tfidf.keys():
+			documentsWithWord = tfidf[word].keys()
+			idf = math.log(len(documents), 10) / len(docsWithWord)
+			for docId in docsWithWord:
+				tf = 1 + math.log(tfidf[word][docId], 10)
+				tfidf[word][docId] = tf * idf
+
+
+	def getTFIDF(self, word, documentId):
+		if not tfidf[word][documentId]:
+			return 0.0
+
+		return tfidf[word][documentId]
 
 	def index(self):
 		print "starting indexing..."
@@ -179,6 +200,14 @@ class BotBrain:
 				top5.append(pQueue.get())
 
 		return top5
+
+
+def test():
+	
+
+
+
+
 
 
 
