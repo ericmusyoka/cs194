@@ -3,11 +3,14 @@ import os
 
 import requests
 from flask import Flask, json, jsonify, render_template, make_response, request, abort
+from TeacherBot import TeacherBot
 
 app = Flask(__name__)
 
 app.static_folder = 'static'
 app.template_folder = 'static'
+
+teacherBot = TeacherBot()
 
 # Detect if deployed on Heroku
 if 'DYNO' in os.environ:
@@ -28,22 +31,13 @@ def not_found(_):
 
 @app.route('/')
 def main_site():
-    return render_template('main.html')
+    return teacherBot.getResponse("Hi")
 
 
-# Toy API caller
-@app.route('/id')
-def identity():
-    r = requests.get('http://myseniorproject.herokuapp.com/whoAmI')
-    d = json.loads(r.text)
-    return str(d)
-
-
-# Toy API responder
-@app.route('/germanbot')
-def who_am_i():
-    return jsonify(identity="Jesus Guzman", age="22", dorms=['Soto', 'Branner', 'Adelfa', 'Roble'])
-
+@app.route('/teacherbot/', methods=['POST'])
+def getresponse():
+    return jsonify(message='--ACK--')
 
 if __name__ == '__main__':
     app.run()
+
