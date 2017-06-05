@@ -1,48 +1,68 @@
 
+from __future__ import division
+import math
+import Queue
+
 class BotBrain:
 	def __init__(self):
 		self.vocabulary = []
 		self.invertedIndex = {} 
 		self.documents = []
+		self.tfidf = {} # {word: { docId: tfidf}}
+
 
 	def readData(self):
-		return []
+		self.documents = [
+			"Egypt has one of the longest histories of any modern country, emerging as one of the world's first".split(),
+			"experienced some of the earliest developments of writing, agriculture, urbanisation, organised religion".split(),
+			"is an integral part of its national identity, which has endured, and at times assimilated, various foreign ".split()
+		]
 
+		for document in self.documents:
+			self.vocabulary.extend(document)
+
+
+	"""
+		Call after indexing
+	"""
 	def computeTFIDF(self):
 		print "Computing tfidf..."
 
-		tfidf = {} # {word: { docId: tfidf}}
-		for docId, document in enumerate(self.documents):
+		for docId in self.documents.keys():
+			document = self.documents[docId]
 			for word in document:
-				wordCountInDocument = len(invertedIndex[word][docId])
-				if word not in tfidf.keys():
-					tfidf[word] = {}
-				if docId not in tfidf[word].keys():
-					tfidf[word][docId] = 0
-				tfidf[word][docId] += wordCountInDocument
+				wordCountInDocument = len(self.invertedIndex[word][docId])
+				if word not in self.tfidf.keys():
+					self.tfidf[word] = {}
+				if docId not in self.tfidf[word].keys():
+					self.tfidf[word][docId] = 0
+				self.tfidf[word][docId] += wordCountInDocument
 
-		for word in tfidf.keys():
-			documentsWithWord = tfidf[word].keys()
-			idf = math.log(len(documents), 10) / len(docsWithWord)
-			for docId in docsWithWord:
-				tf = 1 + math.log(tfidf[word][docId], 10)
-				tfidf[word][docId] = tf * idf
+		for word in self.tfidf.keys():
+			documentsWithWord = self.tfidf[word].keys()
+			idf = math.log(len(self.documents), 10) / len(documentsWithWord)
+			for docId in documentsWithWord:
+				tf = 1 + math.log(self.tfidf[word][docId], 10)
+				self.tfidf[word][docId] = tf * idf
 
 
 	def getTFIDF(self, word, documentId):
-		if not tfidf[word][documentId]:
+		if word not in self.tfidf.keys():
 			return 0.0
 
-		return tfidf[word][documentId]
+		if documentId not in self.tfidf[word].keys():
+			return 0.0
+
+		return self.tfidf[word][documentId]
 
 	def index(self):
 		print "starting indexing..."
 
 		# Populating invertedIndex  { word : { docId: [positions]}}
 		for word in self.vocabulary:
-			invertedIndex[word] = {}
+			self.invertedIndex[word] = {}
 
-		for docId, document in enumerate(self.documemts):
+		for docId, document in enumerate(self.documents):
 			for wordIndex, word in enumerate(document):
 				if wordIndex not in self.invertedIndex[word].keys():
 					self.invertedIndex[word][docId] = []
@@ -76,7 +96,7 @@ class BotBrain:
 			return docs
 
 		# Intersect algorithm
-		docs = getPosting(query[0])
+		docs = self.getPosting(query[0])
 		if len(query) == 1:
 			docs.sort()
 			return docs
@@ -90,21 +110,21 @@ class BotBrain:
 		for queryIndex in range(1, len(query)):
 			posting1 = docs
 			docs = []
-			posting2 = getPosting(query[queryIndex])
+			posting2 = self.getPosting(query[queryIndex])
 			postingIndex1 = 0
 			postingIndex2 = 0
 
-			if len(posting1) == 0 || len(posting2) == 0:
+			if len(posting1) == 0 or len(posting2) == 0:
 				return []
 
 			posting1.sort()
 			posting2.sort()
 
-			while postingIndex1 != len(posting1) && postingIndex2 != len(posting2):
+			while postingIndex1 != len(posting1) and postingIndex2 != len(posting2):
 				posting1DocId = posting1[postingIndex1]
 				posting2DocId = posting2[postingIndex2]
 				if posting1DocId == posting2DocId:
-					docs.extend(posting1DocId)
+					docs.append(posting1DocId)
 					postingIndex1 += 1
 					postingIndex2 += 1
 				elif posting1DocId < posting2DocId:
@@ -116,7 +136,7 @@ class BotBrain:
 			docs.sort()
 			return docs
 
-	def phraseRetrieve(self, query)
+	def phraseRetrieve(self, query):
 		docs = []
 		if len(query) == 0:
 			return docs
@@ -152,7 +172,7 @@ class BotBrain:
 				posting2.sort()
 
 
-				while postingIndex1 != len(posting1) && postingIndex2 != len(posting2):
+				while postingIndex1 != len(posting1) and postingIndex2 != len(posting2):
 					posting1Pos = posting1[postingIndex1]
 					posting2Pos = posting2[postingIndex2]
 					if posting1Pos < posting2Pos:
@@ -165,19 +185,19 @@ class BotBrain:
 
 				validDocPostings[docId] = newValidPostings
 
-				docs.sort()
-				return docs
+		docs.sort()
+		return docs
 
 	def rankRetrieve(self, query):
-		scores = [None for _ in range(len(self.documemts))]
-		length = [None for _ in range(len(self.documemts))]
+		scores = [0.0 for _ in range(len(self.documents))]
+		length = [0.0 for _ in range(len(self.documents))]
 
 		# Cosine similarity
 		for term in query:
 			weightTermQuery = 1 + math.log(query.count(term), 10)
 			docsWithWord = self.getPosting(term)
 			for docId in docsWithWord:
-				scores[docId] = weightTermQuery * getTFIDF(term, docId)
+				scores[docId] = weightTermQuery * self.getTFIDF(term, docId)
 
 		for docId in range(len(scores)):
 			for word in self.documents[docId]:
@@ -188,23 +208,28 @@ class BotBrain:
 			if length[docId] != 0:
 				scores[docId] = scores[docId] / length[docId]
 
-
 		pQueue = Queue.PriorityQueue()
 		for docId in range(len(scores)):
-			pq.put((docId, scores[docId]))
+			pQueue.put((scores[docId], docId))
 
 		top5 = []
 
 		for _ in range(5):
 			if not pQueue.empty():
 				top5.append(pQueue.get())
-
+		top5.reverse()		
 		return top5
 
 
-def test():
-	
+def testRetrival():
+	brain = BotBrain()
+	brain.readData()
+	brain.index()
+	brain.computeTFIDF()
+	print brain.rankRetrieve("Egypt history integral part".split())
 
+if __name__ == '__main__':
+	testRetrival()
 
 
 
