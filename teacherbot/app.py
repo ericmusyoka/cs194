@@ -45,7 +45,7 @@ def main_site():
     return render_template('main.html')
 
 
-@app.route('/moviebot/sendMessage',  methods=['GET', 'POST'])
+@app.route('/teacherbot/sendMessage',  methods=['GET', 'POST'])
 def receive_message():
 	print("moviebot_receive_message")
 	req = {
