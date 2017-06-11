@@ -48,8 +48,6 @@ def main_site():
 @app.route('/moviebot/sendMessage',  methods=['GET'])
 def receive_message():
 	print("moviebot_receive_message")
-	response = teacherBot.getResponse(request.json['text'])
-	send_message(response, request.json['userId'], request.json[u'botId'])
 	req = {
 		'userId': request.json['userId'],
 		'botId': request.json[u'botId'],
