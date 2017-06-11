@@ -14,7 +14,7 @@ app.static_folder = 'static'
 app.template_folder = 'static'
 relay_server_url = 'http://chatio.ngrok.io'
 login_url = relay_server_url + '/admin/botLogin'
-get_users_url = relay_server_url + "/botUserrs"
+get_users_url = relay_server_url + "/botUsers"
 get_user_info_url = relay_server_url + "/userInfo"
 send_message_url = relay_server_url + "/botSendMessage"
 
@@ -45,7 +45,7 @@ def main_site():
     return render_template('main.html')
 
 
-@app.route('/moviebot/sendMessage',  methods=['GET', 'POST'])
+@app.route('/moviebot/sendMessage',  methods=['GET'])
 def receive_message():
 	print("moviebot_receive_message")
 	thread.start_new_thread(process_message, (request,))
@@ -66,47 +66,51 @@ def login_bots():
     if server_response.status_code != 200:
         print('Error logging in')
     else:
+    	global teacherbot_id
+    	global teacherbot_cookies
         teacherbot_id = content['id']
         teacherbot_cookies = cookies
 
 
 def get_users():
-    server_request = requests.get(get_users_url, cookies=teacherbot_cookies)
-    status_code = str(server_request.status_code)
-    response_reason = server_request.reason
-    content = server_request.json()
+	global teacherbot_cookies
+	server_request = requests.get(get_users_url, cookies=teacherbot_cookies)
+	status_code = str(server_request.status_code)
+	response_reason = server_request.reason
+	content = server_request.json()
 
-    print('Respone status code: ' + status_code)
-    print('Respone reason     : ' + response_reason)
-    print('Respone content    : ' + str(content))
+	print('Respone status code: ' + status_code)
+	print('Respone reason     : ' + response_reason)
+	print('Respone content    : ' + str(content))
 
-    if server_request.status_code != 200:
-        print('Error getting users ')
-    else:
-        global moviebot_user_ids
-        teacherbot_user_ids = content['users']
-        print("user ids: " + str(teacherbot_user_ids))
+	if server_request.status_code != 200:
+	    print('Error getting users ')
+	else:
+	    global teacherbot_user_ids
+	    teacherbot_user_ids = content['users']
+	    print("user ids: " + str(teacherbot_user_ids))
 
 
 def send_message(msg, user_id, bot_id):
-    params = {
-        'botId': bot_id,
-        'userId': user_id,
-        'type': 'text',
-        'text': msg
-    }
+	global teacherbot_cookies
+	params = {
+	    'botId': bot_id,
+	    'userId': user_id,
+	    'type': 'text',
+	    'text': msg
+	}
 
-    server_request = requests.post(send_message_url, cookies=teacherbot_cookies, json=params)
-    status_code = str(server_request.status_code)
-    response_reason = server_request.reason
-    content = server_request
+	server_request = requests.post(send_message_url, cookies=teacherbot_cookies, json=params)
+	status_code = str(server_request.status_code)
+	response_reason = server_request.reason
+	content = server_request
 
-    print('Respone status code: ' + status_code)
-    print('Respone reason     : ' + response_reason)
-    print('Respone content    : ' + str(content))
+	print('Respone status code: ' + status_code)
+	print('Respone reason     : ' + response_reason)
+	print('Respone content    : ' + str(content))
 
-    if server_request.status_code != 200:
-        print('Error sending message ')
+	if server_request.status_code != 200:
+	    print('Error sending message ')
 
 
 # def send_multiple_choice_message(options, user_id, bot_id):
@@ -133,20 +137,21 @@ def send_message(msg, user_id, bot_id):
 
 
 def get_user_info(user_id, bot_id):
-    url = get_user_info_url + '/' + bot_id + '/' + user_id + '/basic'
-    server_request = requests.get(url, cookies=teacherbot_cookies)
-    status_code = str(server_request.status_code)
-    response_reason = server_request.reason
-    content = server_request.json()
+	global teacherbot_cookies
+	url = get_user_info_url + '/' + bot_id + '/' + user_id + '/basic'
+	server_request = requests.get(url, cookies=teacherbot_cookies)
+	status_code = str(server_request.status_code)
+	response_reason = server_request.reason
+	content = server_request.json()
 
-    print('Respone status code: ' + status_code)
-    print('Respone reason     : ' + response_reason)
-    print('Respone content    : ' + str(content))
+	print('Respone status code: ' + status_code)
+	print('Respone reason     : ' + response_reason)
+	print('Respone content    : ' + str(content))
 
-    if server_request.status_code != 200:
-        print('Error getting user info ')
+	if server_request.status_code != 200:
+	    print('Error getting user info ')
 
-    print('user infos: ' + str(content))
+	print('user infos: ' + str(content))
 
 def process_message(request):
 	print "I am processing your message"
