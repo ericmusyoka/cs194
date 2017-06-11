@@ -2,6 +2,7 @@
 from __future__ import division
 import math
 import Queue
+import os
 
 class BotBrain:
 	def __init__(self):
@@ -11,12 +12,24 @@ class BotBrain:
 		self.tfidf = {} # {word: { docId: tfidf}}
 
 
-	def readData(self):
-		self.documents = [
-			"Egypt has one of the longest histories of any modern country, emerging as one of the world's first".split(),
-			"experienced some of the earliest developments of writing, agriculture, urbanisation, organised religion".split(),
-			"is an integral part of its national identity, which has endured, and at times assimilated, various foreign ".split()
-		]
+	def readData(self, dataDirectory):
+		filenames = []
+		for filename in os.listdir(dataDirectory):
+			if filename.endswith("txt") and not filename.startswith("."):
+				filenames.append(filename)
+
+		filenames = filenames[:5]
+
+		for filename in filenames:
+			words = []
+			file = open(dataDirectory + filename, "r")
+			for line in file:
+				line = line.lower()
+				line = [x.strip() for x in line.split()]
+				line = [x for x in line if x != ""]
+				words.extend(line)
+			file.close()
+			self.documents.append(words)
 
 		for document in self.documents:
 			self.vocabulary.extend(document)
@@ -64,7 +77,7 @@ class BotBrain:
 
 		for docId, document in enumerate(self.documents):
 			for wordIndex, word in enumerate(document):
-				if wordIndex not in self.invertedIndex[word].keys():
+				if docId not in self.invertedIndex[word].keys():
 					self.invertedIndex[word][docId] = []
 				self.invertedIndex[word][docId].append(wordIndex)
 
@@ -223,10 +236,10 @@ class BotBrain:
 
 def testRetrival():
 	brain = BotBrain()
-	brain.readData()
+	brain.readData("crawler/data/")
 	brain.index()
 	brain.computeTFIDF()
-	print brain.rankRetrieve("Egypt history integral part".split())
+	print brain.rankRetrieve("History is the discovery, collection, organization, analysis, and presentation of information about past events. History ".split())
 
 if __name__ == '__main__':
 	testRetrival()

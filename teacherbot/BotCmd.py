@@ -24,7 +24,7 @@ class BotCmd(cmd.Cmd):
         if line == 'q':
             return True
         else:
-            print 'Bot: ' + self.teacherBot.getResponse(line)
+            print 'Bot: ', self.teacherBot.getResponse(line)
 
     def postcmd(self, stop, line):
         if line == 'q':

@@ -51,7 +51,7 @@
 			I will remember your name, 
 			<set name="username"> <star/> </set>
 
-		</template>s
+		</template>
 	</category>
 
 	<category>
@@ -60,7 +60,6 @@
 			Nice try. Your name is <get name="username"/>			
 		</template>s
 	</category>
-
 
 </aiml>
 
