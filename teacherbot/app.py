@@ -14,7 +14,7 @@ app.static_folder = 'static'
 app.template_folder = 'static'
 relay_server_url = 'http://chatio.ngrok.io'
 login_url = relay_server_url + '/admin/botLogin'
-get_users_url = relay_server_url + "/botUsers"
+get_users_url = relay_server_url + "/botUserrs"
 get_user_info_url = relay_server_url + "/userInfo"
 send_message_url = relay_server_url + "/botSendMessage"
 
@@ -45,7 +45,7 @@ def main_site():
     return render_template('main.html')
 
 
-@app.route('/moviebot/sendMessage',  methods=['GET'])
+@app.route('/moviebot/sendMessage',  methods=['GET', 'POST'])
 def receive_message():
 	print("moviebot_receive_message")
 	thread.start_new_thread(process_message, (request,))
