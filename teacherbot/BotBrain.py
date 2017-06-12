@@ -3,6 +3,7 @@ from __future__ import division
 import math
 import Queue
 import os
+import json
 
 class BotBrain:
 	def __init__(self):
@@ -10,6 +11,7 @@ class BotBrain:
 		self.invertedIndex = {} 
 		self.documents = []
 		self.tfidf = {} # {word: { docId: tfidf}}
+		self.docIdToFilename = {}
 
 
 	def readData(self, dataDirectory):
@@ -17,10 +19,11 @@ class BotBrain:
 		for filename in os.listdir(dataDirectory):
 			if filename.endswith("txt") and not filename.startswith("."):
 				filenames.append(filename)
+				print filename
 
 		filenames = filenames[:5]
 
-		for filename in filenames:
+		for docId, filename in enumerate(filenames):
 			words = []
 			file = open(dataDirectory + filename, "r")
 			for line in file:
@@ -30,6 +33,7 @@ class BotBrain:
 				words.extend(line)
 			file.close()
 			self.documents.append(words)
+			self.docIdToFilename[str(docId)] = filename
 
 		for document in self.documents:
 			self.vocabulary.extend(document)
@@ -42,31 +46,31 @@ class BotBrain:
 		print "Computing tfidf..."
 
 		for docId in self.documents.keys():
-			document = self.documents[docId]
+			document = self.documents[str(docId)]
 			for word in document:
-				wordCountInDocument = len(self.invertedIndex[word][docId])
+				wordCountInDocument = len(self.invertedIndex[word][str(docId)])
 				if word not in self.tfidf.keys():
 					self.tfidf[word] = {}
-				if docId not in self.tfidf[word].keys():
-					self.tfidf[word][docId] = 0
-				self.tfidf[word][docId] += wordCountInDocument
+				if str(docId) not in self.tfidf[word].keys():
+					self.tfidf[word][str(docId)] = 0
+				self.tfidf[word][str(docId)] += wordCountInDocument
 
 		for word in self.tfidf.keys():
 			documentsWithWord = self.tfidf[word].keys()
 			idf = math.log(len(self.documents), 10) / len(documentsWithWord)
 			for docId in documentsWithWord:
-				tf = 1 + math.log(self.tfidf[word][docId], 10)
-				self.tfidf[word][docId] = tf * idf
+				tf = 1 + math.log(self.tfidf[word][str(docId)], 10)
+				self.tfidf[word][str(docId)] = tf * idf
 
 
 	def getTFIDF(self, word, documentId):
 		if word not in self.tfidf.keys():
 			return 0.0
 
-		if documentId not in self.tfidf[word].keys():
+		if str(documentId) not in self.tfidf[word].keys():
 			return 0.0
 
-		return self.tfidf[word][documentId]
+		return self.tfidf[word][str(documentId)]
 
 	def index(self):
 		print "starting indexing..."
@@ -77,14 +81,14 @@ class BotBrain:
 
 		for docId, document in enumerate(self.documents):
 			for wordIndex, word in enumerate(document):
-				if docId not in self.invertedIndex[word].keys():
-					self.invertedIndex[word][docId] = []
-				self.invertedIndex[word][docId].append(wordIndex)
+				if str(docId) not in self.invertedIndex[word].keys():
+					self.invertedIndex[word][str(docId)] = []
+				self.invertedIndex[word][str(docId)].append(wordIndex)
 
 		# Creating doc id to doc words map {docId: set(docWords)}
 		idToDocWords = {}
 		for docId, document in enumerate(self.documents):
-			idToDocWords[docId] = set(document)
+			idToDocWords[str(docId)] = set(document)
 		self.documents = idToDocWords
 
 		print "finished indexing..."
@@ -210,11 +214,11 @@ class BotBrain:
 			weightTermQuery = 1 + math.log(query.count(term), 10)
 			docsWithWord = self.getPosting(term)
 			for docId in docsWithWord:
-				scores[docId] = weightTermQuery * self.getTFIDF(term, docId)
+				scores[int(docId)] = weightTermQuery * self.getTFIDF(term, str(docId))
 
 		for docId in range(len(scores)):
-			for word in self.documents[docId]:
-				length[docId] +=  math.pow(self.getTFIDF(word, docId), 2)
+			for word in self.documents[str(docId)]:
+				length[docId] +=  math.pow(self.getTFIDF(word, str(docId)), 2)
 			length[docId] = math.sqrt(length[docId])
 
 		for docId in range(len(scores)):
@@ -234,15 +238,41 @@ class BotBrain:
 		return top5
 
 
+	def loadData(self):
+		"""
+		Loads precomputed values if available.
+		If no precomputed data then it computes and stores the results
+		"""
+		if self.precomputedDataExists():
+			self.loadPrecomputedData()
+		else:
+			self.computedAndStoreData()
+
+	def precomputedDataExists(self):
+		precomputationPath = "computations/"
+		if os.listdir(precomputationPath) == []:
+			return False
+		else:
+			return True
+
+
+	def loadPrecomputedData(self):
+		return
+
+	def computeAndStoreData(self):
+		return
+
 def testRetrival():
 	brain = BotBrain()
 	brain.readData("crawler/data/")
 	brain.index()
 	brain.computeTFIDF()
 	print brain.rankRetrieve("History is the discovery, collection, organization, analysis, and presentation of information about past events. History ".split())
+	print brain.precomputedDataExists()
 
 if __name__ == '__main__':
 	testRetrival()
+
 
 
 
