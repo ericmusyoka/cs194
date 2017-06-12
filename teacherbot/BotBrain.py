@@ -19,7 +19,6 @@ class BotBrain:
 		for filename in os.listdir(dataDirectory):
 			if filename.endswith("txt") and not filename.startswith("."):
 				filenames.append(filename)
-				print filename
 
 		filenames = filenames[:5]
 
@@ -88,7 +87,7 @@ class BotBrain:
 		# Creating doc id to doc words map {docId: set(docWords)}
 		idToDocWords = {}
 		for docId, document in enumerate(self.documents):
-			idToDocWords[str(docId)] = set(document)
+			idToDocWords[str(docId)] = document
 		self.documents = idToDocWords
 
 		print "finished indexing..."
@@ -257,7 +256,37 @@ class BotBrain:
 
 
 	def loadPrecomputedData(self):
-		return
+		# vocabulary
+		vocabularyPath = "computations/vocabulary.json"
+		file = open(vocabularyPath, "r")
+		self.vocabulary = json.loads(file.read())
+		file.close()
+
+		# inverted-index
+		invertedIndexPath = "computations/invertedIndex.json"
+		file = open(invertedIndexPath, "r")
+		self.invertedIndex = json.loads(file.read())
+		file.close()
+
+		# tfidf
+		tfidfPath = "computations/tfidf.json"
+		file = open(tfidfPath, "r")
+		self.tfidf = json.loads(file.read())
+		file.close()
+
+		# docIdToFilename
+		docIdToFilenamePath = "computations/docIdToFilename.json"
+		file = open(docIdToFilenamePath, "r")
+		self.docIdToFilename = json.loads(file.read())
+		file.close()
+
+		#documents
+		documentsPath = "computations/documents.json"
+		file = open(documentsPath, "r")
+		self.documents = json.loads(file.read())
+		file.close()
+
+
 
 	def computeAndStoreData(self):
 		self.readData("crawler/data/")
@@ -265,28 +294,35 @@ class BotBrain:
 		self.computeTFIDF()
 
 		# vocabulary
-		vocabularyPath = "computations/vocabulary"
+		vocabularyPath = "computations/vocabulary.json"
 		file = open(vocabularyPath, "w")
 		file.write(json.dumps(self.vocabulary))
 		file.close()
 
 		# inverted-index
-		invertedIndexPath = "computations/invertedIndex"
+		invertedIndexPath = "computations/invertedIndex.json"
 		file = open(invertedIndexPath, "w")
 		file.write(json.dumps(self.invertedIndex))
 		file.close()
 
 		# tfidf
-		tfidfPath = "computations/tfidf"
+		tfidfPath = "computations/tfidf.json"
 		file = open(tfidfPath, "w")
 		file.write(json.dumps(self.tfidf))
 		file.close()
 
 		# docIdToFilename
-		docIdToFilenamePath = "computations/docIdToFilename"
+		docIdToFilenamePath = "computations/docIdToFilename.json"
 		file = open(docIdToFilenamePath, "w")
 		file.write(json.dumps(self.docIdToFilename))
 		file.close()
+
+		#documents
+		documentsPath = "computations/documents.json"
+		file = open(documentsPath, "w")
+		file.write(json.dumps(self.documents))
+		file.close()
+
 
 
 def testRetrival():
@@ -294,9 +330,12 @@ def testRetrival():
 	# brain.readData("crawler/data/")
 	# brain.index()
 	# brain.computeTFIDF()
-	# print brain.rankRetrieve("History is the discovery, collection, organization, analysis, and presentation of information about past events. History ".split())
+	# brain.computeAndStoreData()
+	brain.loadPrecomputedData()
+	print brain.rankRetrieve("History is the discovery, collection, organization, analysis, and presentation of information about past events. History ".split())
 	# print brain.precomputedDataExists()
-	brain.computeAndStoreData()
+	# brain.computeAndStoreData()
+
 
 if __name__ == '__main__':
 	testRetrival()
