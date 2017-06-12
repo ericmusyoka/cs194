@@ -20,7 +20,7 @@ class BotBrain:
 			if filename.endswith("txt") and not filename.startswith("."):
 				filenames.append(filename)
 
-		filenames = filenames[:5]
+		filenames = filenames[:100]
 
 		for docId, filename in enumerate(filenames):
 			words = []
@@ -44,13 +44,12 @@ class BotBrain:
 			if filename.endswith("txt") and not filename.startswith("."):
 				filenames.append(filename)
 
-		filenames = filenames[:5]
+		filenames = filenames[:20]
 
 		for filename in filenames:
 			file = open(dataDirectory + filename, "r")
 			lines = file.read().split(".")
 			for docId, line in enumerate(lines):
-				print line
 				line = line.lower()
 				line = [x.strip() for x in line.split()]
 				line = [x for x in line if x != ""]
@@ -68,7 +67,9 @@ class BotBrain:
 		print "Computing tfidf..."
 
 		for count, docId in enumerate(self.documents.keys()):
-			print "-- Doc number ", count, " ..."
+			if count % 100 == 0 :
+				print "-- Doc number ", count, " of ", len(self.documents)
+
 			document = self.documents[str(docId)]
 			for word in document:
 				wordCountInDocument = len(self.invertedIndex[word][str(docId)])
@@ -254,7 +255,7 @@ class BotBrain:
 
 		top5 = []
 
-		for _ in range(5):
+		for _ in range(3):
 			if not pQueue.empty():
 				top5.append(pQueue.get())
 		return top5
@@ -349,22 +350,28 @@ class BotBrain:
 		file.write(json.dumps(self.documents))
 		file.close()
 
-	def findRelevantLines(self, line):
-		docScores = self.rankRetrieve(line)
-		print docScores
+	def findRelevantLines(self, query):
+		relevantLines = ""
+		query = query.lower()
+		query = query.split()
+		docScores = self.rankRetrieve(query)
 		if docScores == []:
 			return "I have no such information, but I am learning."
 
-		(_, bestDocId) = docScores[0]
-		line = self.documents[str(bestDocId)]
-		return " ".join(line)
+		for docScore in docScores:
+			(_, bestDocId) = docScore
+			line = self.documents[str(bestDocId)]
+			line = "-> " + " ".join(line) + ".\n"
+			relevantLines += line
+
+		return relevantLines
 
 
 
 def testRetrival():
 	brain = BotBrain()
 	brain.loadData()
-	print brain.findRelevantLines("tell me egypt".split())
+	print brain.findRelevantLines("tell me history")
 
 if __name__ == '__main__':
 	testRetrival()
