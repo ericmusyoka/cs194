@@ -20,7 +20,7 @@ class BotBrain:
 			if filename.endswith("txt") and not filename.startswith("."):
 				filenames.append(filename)
 
-		filenames = filenames[:5]
+		filenames = filenames[:100]
 
 		for docId, filename in enumerate(filenames):
 			words = []
