@@ -45,36 +45,42 @@ def main_site():
     return render_template('main.html')
 
 
-@app.route('/teacherbot/sendMessage',  methods=['GET', 'POST'])
+@app.route('/teacherbot/sendMessage',  methods=['POST'])
 def receive_message():
 	print("moviebot_receive_message")
+
+	if not request.json['userId'] or not request.json[u'botId'] or not request.json['text']:
+		return jsonify(message='Parameters userId, bodId, text not properly defined')
+
 	req = {
 		'userId': request.json['userId'],
 		'botId': request.json[u'botId'],
 		'text': request.json['text']
 	}
+
 	thread.start_new_thread(process_message, (req,))
 	return jsonify(message='--ACK--')
 
 
 def login_bots():
-    server_response = requests.post(login_url, json=teacherbot_credentials)
-    status_code = str(server_response.status_code)
-    response_reason = server_response.reason
-    content = server_response.json()
-    cookies = server_response.cookies
+	global teacherbot_credentials
+	server_response = requests.post(login_url, json=teacherbot_credentials)
+	status_code = str(server_response.status_code)
+	response_reason = server_response.reason
+	content = server_response.json()
+	cookies = server_response.cookies
 
-    print('Respone status code: ' + status_code)
-    print('Respone reason     : ' + response_reason)
-    print('Respone text       : ' + str(content))
+	print('Respone status code: ' + status_code)
+	print('Respone reason     : ' + response_reason)
+	print('Respone text       : ' + str(content))
 
-    if server_response.status_code != 200:
-        print('Error logging in')
-    else:
-    	global teacherbot_id
-    	global teacherbot_cookies
-        teacherbot_id = content['id']
-        teacherbot_cookies = cookies
+	if server_response.status_code != 200:
+	    print('Error logging in')
+	else:
+		global teacherbot_id
+		global teacherbot_cookies
+		teacherbot_id = content['id']
+		teacherbot_cookies = cookies
 
 
 def get_users():
@@ -168,6 +174,7 @@ def process_message(req):
 if __name__ == '__main__':
 
     # log in severs
+    print "starting login..."
     login_bots()
 
     # get user ids
