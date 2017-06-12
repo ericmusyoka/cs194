@@ -37,6 +37,29 @@ class BotBrain:
 		for document in self.documents:
 			self.vocabulary.extend(document)
 
+	#Line as a doc
+	def readData2(self, dataDirectory):
+		filenames = []
+		for filename in os.listdir(dataDirectory):
+			if filename.endswith("txt") and not filename.startswith("."):
+				filenames.append(filename)
+
+		filenames = filenames[:5]
+
+		for filename in filenames:
+			file = open(dataDirectory + filename, "r")
+			lines = file.read().split(".")
+			for docId, line in enumerate(lines):
+				print line
+				line = line.lower()
+				line = [x.strip() for x in line.split()]
+				line = [x for x in line if x != ""]
+				self.documents.append(line)
+				self.docIdToFilename[str(docId)] = filename
+			file.close()
+
+		for document in self.documents:
+			self.vocabulary.extend(document)	
 
 	"""
 		Call after indexing
@@ -227,14 +250,13 @@ class BotBrain:
 
 		pQueue = Queue.PriorityQueue()
 		for docId in range(len(scores)):
-			pQueue.put((scores[docId], docId))
+			pQueue.put((-scores[docId], docId))
 
 		top5 = []
 
 		for _ in range(5):
 			if not pQueue.empty():
 				top5.append(pQueue.get())
-		top5.reverse()		
 		return top5
 
 
@@ -293,7 +315,7 @@ class BotBrain:
 
 	def computeAndStoreData(self):
 		print "Compute and store data ...."
-		self.readData("crawler/data/")
+		self.readData2("crawler/data/")
 		self.index()
 		self.computeTFIDF()
 
@@ -327,12 +349,22 @@ class BotBrain:
 		file.write(json.dumps(self.documents))
 		file.close()
 
+	def findRelevantLines(self, line):
+		docScores = self.rankRetrieve(line)
+		print docScores
+		if docScores == []:
+			return "I have no such information, but I am learning."
+
+		(_, bestDocId) = docScores[0]
+		line = self.documents[str(bestDocId)]
+		return " ".join(line)
+
 
 
 def testRetrival():
 	brain = BotBrain()
 	brain.loadData()
-	print brain.rankRetrieve("History is the discovery, collection, organization, analysis, and presentation of information about past events. History ".split())
+	print brain.findRelevantLines("tell me egypt".split())
 
 if __name__ == '__main__':
 	testRetrival()
