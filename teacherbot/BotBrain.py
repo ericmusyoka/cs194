@@ -260,15 +260,43 @@ class BotBrain:
 		return
 
 	def computeAndStoreData(self):
-		return
+		self.readData("crawler/data/")
+		self.index()
+		self.computeTFIDF()
+
+		# vocabulary
+		vocabularyPath = "computations/vocabulary"
+		file = open(vocabularyPath, "w")
+		file.write(json.dumps(self.vocabulary))
+		file.close()
+
+		# inverted-index
+		invertedIndexPath = "computations/invertedIndex"
+		file = open(invertedIndexPath, "w")
+		file.write(json.dumps(self.invertedIndex))
+		file.close()
+
+		# tfidf
+		tfidfPath = "computations/tfidf"
+		file = open(tfidfPath, "w")
+		file.write(json.dumps(self.tfidf))
+		file.close()
+
+		# docIdToFilename
+		docIdToFilenamePath = "computations/docIdToFilename"
+		file = open(docIdToFilenamePath, "w")
+		file.write(json.dumps(self.docIdToFilename))
+		file.close()
+
 
 def testRetrival():
 	brain = BotBrain()
-	brain.readData("crawler/data/")
-	brain.index()
-	brain.computeTFIDF()
-	print brain.rankRetrieve("History is the discovery, collection, organization, analysis, and presentation of information about past events. History ".split())
-	print brain.precomputedDataExists()
+	# brain.readData("crawler/data/")
+	# brain.index()
+	# brain.computeTFIDF()
+	# print brain.rankRetrieve("History is the discovery, collection, organization, analysis, and presentation of information about past events. History ".split())
+	# print brain.precomputedDataExists()
+	brain.computeAndStoreData()
 
 if __name__ == '__main__':
 	testRetrival()
