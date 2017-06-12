@@ -17,6 +17,7 @@ class BotBrain:
 		self.docIdToFilename = {}
 
 		self.stemmer = PorterStemmer()
+		self.stopWords = []
 
 
 	def readData(self, dataDirectory):
@@ -46,6 +47,13 @@ class BotBrain:
 
 	#Line as a doc
 	def readData2(self, dataDirectory):
+		#stop words
+		file = open("sentiment/data/imdb1/english.stop" , "r")
+		self.stopWords = file.read().split()
+		self.stopWords = [word.strip() for word in self.stopWords]
+		self.stopWords = [x for x in self.stopWords if x != ""]
+		self.stopWords = [self.stemmer.stem(word) for word in self.stopWords]
+
 		filenames = []
 		for filename in os.listdir(dataDirectory):
 			if filename.endswith("txt") and not filename.startswith("."):
@@ -62,6 +70,7 @@ class BotBrain:
 				line = [x for x in line if x != ""]
 				self.documentsUnstemmed.append(line)
 				line = [self.stemmer.stem(word) for word in line]
+				line = self.removeStopWords(line)
 				self.documents.append(line)
 				self.docIdToFilename[str(docId)] = filename
 			file.close()
@@ -70,6 +79,7 @@ class BotBrain:
 			self.vocabulary.extend(document)
 
 		self.vocabulary = self.getUnique(self.vocabulary)
+
 
 	def getUnique(self, words):
 		uniqWords = set(words)
@@ -338,6 +348,12 @@ class BotBrain:
 		self.documents = json.loads(file.read())
 		file.close()
 
+		#stop words
+		stopPath = "computations/stop.json"
+		file = open(stopPath, "r")
+		self.stopWords = json.loads(self.stopWords)
+		file.close()
+
 		print "Finished loading precomputed data ...." 
 
 
@@ -385,6 +401,12 @@ class BotBrain:
 		file.write(json.dumps(self.documents))
 		file.close()
 
+		#stop words
+		stopPath = "computations/stop.json"
+		file = open(stopPath, "w")
+		file.write(json.dumps(self.stopWords))
+		file.close()
+
 		print "Finished Computing and storing data ...."
 
 	def findRelevantLines(self, query):
@@ -392,6 +414,7 @@ class BotBrain:
 		query = query.lower()
 		query = query.split()
 		query = [self.stemmer.stem(word) for word in query]
+		query = self.removeStopWords(query)
 		docScores = self.rankRetrieve(query)
 		if docScores == []:
 			return "I have no such information, but I am learning."
@@ -403,6 +426,10 @@ class BotBrain:
 			relevantLines += line
 
 		return relevantLines
+
+	def removeStopWords(self, words):
+		result = [word for word in words if word not in self.stopWords]
+		return results
 
 def testRetrival():
 	brain = BotBrain()
