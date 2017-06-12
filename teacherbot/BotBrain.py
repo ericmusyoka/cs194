@@ -312,6 +312,9 @@ class BotBrain:
 		self.documents = json.loads(file.read())
 		file.close()
 
+		print "Finished loading precomputed data ...." 
+
+
 
 
 	def computeAndStoreData(self):
@@ -349,6 +352,8 @@ class BotBrain:
 		file = open(documentsPath, "w")
 		file.write(json.dumps(self.documents))
 		file.close()
+
+		print "Finished Computing and storing data ...."
 
 	def findRelevantLines(self, query):
 		relevantLines = ""
