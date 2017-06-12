@@ -62,27 +62,6 @@ def receive_message():
 	return jsonify(message='--ACK--')
 
 
-def login_bots():
-	global teacherbot_credentials
-	server_response = requests.post(login_url, json=teacherbot_credentials)
-	status_code = str(server_response.status_code)
-	response_reason = server_response.reason
-	content = server_response.json()
-	cookies = server_response.cookies
-
-	print('Respone status code: ' + status_code)
-	print('Respone reason     : ' + response_reason)
-	print('Respone text       : ' + str(content))
-
-	if server_response.status_code != 200:
-	    print('Error logging in')
-	else:
-		global teacherbot_id
-		global teacherbot_cookies
-		teacherbot_id = content['id']
-		teacherbot_cookies = cookies
-
-
 def get_users():
 	global teacherbot_cookies
 	server_request = requests.get(get_users_url, cookies=teacherbot_cookies)
@@ -175,7 +154,24 @@ if __name__ == '__main__':
 
     # log in severs
     print "starting login..."
-    login_bots()
+    global teacherbot_credentials
+	server_response = requests.post(login_url, json=teacherbot_credentials)
+	status_code = str(server_response.status_code)
+	response_reason = server_response.reason
+	content = server_response.json()
+	cookies = server_response.cookies
+
+	print('Respone status code: ' + status_code)
+	print('Respone reason     : ' + response_reason)
+	print('Respone text       : ' + str(content))
+
+	if server_response.status_code != 200:
+	    print('Error logging in')
+	else:
+		global teacherbot_id
+		global teacherbot_cookies
+		teacherbot_id = content['id']
+		teacherbot_cookies = cookies
 
     # get user ids
     get_users()
