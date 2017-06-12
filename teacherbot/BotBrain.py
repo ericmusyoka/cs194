@@ -48,7 +48,7 @@ class BotBrain:
 	#Line as a doc
 	def readData2(self, dataDirectory):
 		#stop words
-		file = open("sentiment/data/imdb1/english.stop" , "r")
+		file = open("sentiment/data/english.stop" , "r")
 		self.stopWords = file.read().split()
 		self.stopWords = [word.strip() for word in self.stopWords]
 		self.stopWords = [x for x in self.stopWords if x != ""]
@@ -428,7 +428,7 @@ class BotBrain:
 		return relevantLines
 
 	def removeStopWords(self, words):
-		result = [word for word in words if word not in self.stopWords]
+		results = [word for word in words if word not in self.stopWords]
 		return results
 
 def testRetrival():
