@@ -5,13 +5,18 @@ import Queue
 import os
 import json
 
+from PorterStemmer import PorterStemmer
+
 class BotBrain:
 	def __init__(self):
 		self.vocabulary = []
 		self.invertedIndex = {} 
 		self.documents = []
+		self.documentsUnstemmed = []
 		self.tfidf = {} # {word: { docId: tfidf}}
 		self.docIdToFilename = {}
+
+		self.stemmer = PorterStemmer()
 
 
 	def readData(self, dataDirectory):
@@ -37,6 +42,8 @@ class BotBrain:
 		for document in self.documents:
 			self.vocabulary.extend(document)
 
+		self.vocabulary = self.getUnique(self.vocabulary)
+
 	#Line as a doc
 	def readData2(self, dataDirectory):
 		filenames = []
@@ -53,12 +60,20 @@ class BotBrain:
 				line = line.lower()
 				line = [x.strip() for x in line.split()]
 				line = [x for x in line if x != ""]
+				self.documentsUnstemmed.append(line)
+				line = [self.stemmer.stem(word) for word in line]
 				self.documents.append(line)
 				self.docIdToFilename[str(docId)] = filename
 			file.close()
 
 		for document in self.documents:
-			self.vocabulary.extend(document)	
+			self.vocabulary.extend(document)
+
+		self.vocabulary = self.getUnique(self.vocabulary)
+
+	def getUnique(self, words):
+		uniqWords = set(words)
+		return list(uniqWords)
 
 	"""
 		Call after indexing
@@ -114,6 +129,11 @@ class BotBrain:
 		for docId, document in enumerate(self.documents):
 			idToDocWords[str(docId)] = document
 		self.documents = idToDocWords
+
+		idToDocWords = {}
+		for docId, document in enumerate(self.documentsUnstemmed):
+			idToDocWords[str(docId)] = document
+		self.documentsUnstemmed = idToDocWords
 
 		print "finished indexing..."
 
@@ -312,6 +332,12 @@ class BotBrain:
 		self.documents = json.loads(file.read())
 		file.close()
 
+		#documents
+		documentsPath = "computations/documentsUnstemmed.json"
+		file = open(documentsPath, "r")
+		self.documents = json.loads(file.read())
+		file.close()
+
 		print "Finished loading precomputed data ...." 
 
 
@@ -353,25 +379,30 @@ class BotBrain:
 		file.write(json.dumps(self.documents))
 		file.close()
 
+		#documents
+		documentsPath = "computations/documentsUnstemmed.json"
+		file = open(documentsPath, "w")
+		file.write(json.dumps(self.documents))
+		file.close()
+
 		print "Finished Computing and storing data ...."
 
 	def findRelevantLines(self, query):
 		relevantLines = ""
 		query = query.lower()
 		query = query.split()
+		query = [self.stemmer.stem(word) for word in query]
 		docScores = self.rankRetrieve(query)
 		if docScores == []:
 			return "I have no such information, but I am learning."
 
 		for docScore in docScores:
 			(_, bestDocId) = docScore
-			line = self.documents[str(bestDocId)]
+			line = self.documentsUnstemmed[str(bestDocId)]
 			line = "-> " + " ".join(line) + ".\n"
 			relevantLines += line
 
 		return relevantLines
-
-
 
 def testRetrival():
 	brain = BotBrain()
