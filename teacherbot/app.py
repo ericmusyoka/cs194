@@ -7,8 +7,8 @@ import threading
 
 def send_message(message, uid, bid):
     data = {
-        "username": "eliza",
-        "password": "eliza"
+        "username": "teacherbot",
+        "password": "teacherbot"
     }
     #"http://protected-ridge-46546.herokuapp.com/admin/botLogin"
     response = requests.post("http://chatio.ngrok.io/admin/botLogin", json=data)
@@ -30,8 +30,8 @@ def receive_message():
 
 if __name__ == '__main__':
     data = {
-        "username": "eliza",
-        "password": "eliza"
+        "username": "teacherbot",
+        "password": "teacherbot"
     }
     print("Before login.")
     #"http://protected-ridge-46546.herokuapp.com/admin/botLogin"
