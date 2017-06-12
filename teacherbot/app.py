@@ -4,7 +4,6 @@ from flask import request
 import json
 import requests
 import threading
-
 app = Flask(__name__)
 
 def send_message(message, uid, bid):
