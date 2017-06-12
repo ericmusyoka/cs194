@@ -19,7 +19,7 @@ class TeacherBot:
 	def getResponse(self, line):
 		response = self.templateHandler.respond(line)
 		if response == "":
-			return self.brain.rankRetrieve(line)
+			return str(self.brain.rankRetrieve(line))
 		else:
 			return response
 
