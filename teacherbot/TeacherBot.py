@@ -12,9 +12,7 @@ class TeacherBot:
 
 	def initBrain(self):
 		self.brain = BotBrain()
-		self.brain.readData("crawler/data/")
-		self.brain.index()
-		self.brain.computeTFIDF()
+		self.brain.loadData()
 
 	def getResponse(self, line):
 		response = self.templateHandler.respond(line)
