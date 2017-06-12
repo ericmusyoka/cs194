@@ -20,7 +20,7 @@ class BotBrain:
 			if filename.endswith("txt") and not filename.startswith("."):
 				filenames.append(filename)
 
-		filenames = filenames[:5]
+		filenames = filenames[:20]
 
 		for docId, filename in enumerate(filenames):
 			words = []
@@ -44,7 +44,8 @@ class BotBrain:
 	def computeTFIDF(self):
 		print "Computing tfidf..."
 
-		for docId in self.documents.keys():
+		for count, docId in enumerate(self.documents.keys()):
+			print "-- Doc number ", count, " ..."
 			document = self.documents[str(docId)]
 			for word in document:
 				wordCountInDocument = len(self.invertedIndex[word][str(docId)])
@@ -245,7 +246,7 @@ class BotBrain:
 		if self.precomputedDataExists():
 			self.loadPrecomputedData()
 		else:
-			self.computedAndStoreData()
+			self.computeAndStoreData()
 
 	def precomputedDataExists(self):
 		precomputationPath = "computations/"
@@ -256,6 +257,8 @@ class BotBrain:
 
 
 	def loadPrecomputedData(self):
+		print "Loading precomputed data ...." 
+
 		# vocabulary
 		vocabularyPath = "computations/vocabulary.json"
 		file = open(vocabularyPath, "r")
@@ -289,6 +292,7 @@ class BotBrain:
 
 
 	def computeAndStoreData(self):
+		print "Compute and store data ...."
 		self.readData("crawler/data/")
 		self.index()
 		self.computeTFIDF()
@@ -327,15 +331,8 @@ class BotBrain:
 
 def testRetrival():
 	brain = BotBrain()
-	# brain.readData("crawler/data/")
-	# brain.index()
-	# brain.computeTFIDF()
-	# brain.computeAndStoreData()
-	brain.loadPrecomputedData()
+	brain.loadData()
 	print brain.rankRetrieve("History is the discovery, collection, organization, analysis, and presentation of information about past events. History ".split())
-	# print brain.precomputedDataExists()
-	# brain.computeAndStoreData()
-
 
 if __name__ == '__main__':
 	testRetrival()
